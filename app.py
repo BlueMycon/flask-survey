@@ -33,14 +33,20 @@ def get_question(num):
 
 @app.post("/answer")
 def next_question_or_complete():
-    # get answer and store in memory
-    question_num = request.form.get('question_num')
-    choice = request.form.get('choice')
-    print('question_num',question_num)
-    print('choice=', choice)
-    breakpoint()
-    return ""
+    # get answer and question number and store in memory
+    answer = request.form.get('answer')
+    question_num = int(request.form.get("question_num"))
+    print("\n\n")
+    print('answer=',answer)
+    print("question_num=",question_num)
+
+    print("before responses=",responses)
+    responses.append(answer)
+    print("after responses=",responses)
+    print("\n\n")
+
+    # else next question
+    return redirect(f"/questions/{question_num + 1}")
 
     # last question? done
-    # else next question
 
