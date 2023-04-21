@@ -2,12 +2,10 @@
 
 {% block content %}
 
-## research get index jinja (loop.index)
-
 <h1>Thanks for completing this survey!</h1>
 <ul>
-  {% for pair in q_and_a %}
-  <li><b>{{pair[0].prompt}}</b> {{pair[1]}}</li>
+  {% for question in questions %}
+  <li><b>{{question.prompt}}</b> {{ responses[loop.index0] }}</li>
   {%endfor%}
 </ul>
 

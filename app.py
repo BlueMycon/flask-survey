@@ -8,36 +8,34 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
 
-#   list of string answers from user
-responses = []
-
-# list of question and answer pairs
-q_and_a_pairs = []
-
 @app.get("/")
 def survey_start():
-    """survey title, instructions and button to start survey"""
-    survey_title = survey.title
-    survey_instructions = survey.instructions
-    q_and_a_pairs.clear()
-
-## survey, not aurvey.title .instructions etc, edit in html
+    """initialize session, display survey title, instructions and button to start survey"""
+    session["responses"] = []
     return render_template("survey_start.html",
-                           survey_title=survey_title,
-                           survey_instructions=survey_instructions)
+                           survey=survey)
 
 @app.post("/begin")
 def redirect_to_question():
     """reveals fisrt survey question"""
     return redirect("/questions/0")
 
-@app.get("/questions/<int:num>") ## num > q_id, think of edge cases of out of sequence responses
-def get_question(num):
+## num > q_id, think of edge cases of out of sequence responses
+@app.get("/questions/<int:q_id>")
+def get_question(q_id):
     """display next survey question(s)"""
-    question = survey.questions[num]
+    responses = session["responses"]
+
+    # check if invalid q_id
+    #TODO: how to check for negative and string q_id's
+    if not (q_id == len(responses)) or not (type(q_id) == int):
+        # TODO: why not len(session["responses"]) ?
+        return redirect(f"/questions/{len(responses)}")
+
+    question = survey.questions[q_id]
     return render_template("question.html",
                            question=question,
-                           question_num=num)
+                           question_num=q_id)
 
 @app.post("/answer")
 def next_question_or_complete():
@@ -45,11 +43,11 @@ def next_question_or_complete():
     answer = request.form.get('answer')
     question_num = int(request.form.get("question_num"))
 
-    # add answer to responses list
+    # add answer to session
+    # TODO: why not session["responses"] = session["responses"].append(answer) ?
+    responses = session["responses"]
     responses.append(answer)
-
-    # add q and a pairs to list
-    q_and_a_pairs.append([survey.questions[question_num], answer])
+    session["responses"] = responses
 
     # if we get to last question, redirect to completion.html
     if question_num == len(survey.questions) -1:
@@ -60,7 +58,9 @@ def next_question_or_complete():
 @app.get("/completion")
 def complete_survey():
     """when user answers last question, redirect to completion page"""
-    return render_template("completion.html", q_and_a= q_and_a_pairs)
+    return render_template("completion.html",
+                           questions=survey.questions,
+                           responses=session["responses"])
 
 
 
