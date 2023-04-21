@@ -30,6 +30,7 @@ def get_question(q_id):
     #TODO: how to check for negative and string q_id's
     if not (q_id == len(responses)) or not (type(q_id) == int):
         # TODO: why not len(session["responses"]) ?
+        flash('Invalid Input! Redirecting you to your next survey question')
         return redirect(f"/questions/{len(responses)}")
 
     question = survey.questions[q_id]
